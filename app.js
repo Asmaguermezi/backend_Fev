@@ -1,46 +1,79 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+require('dotenv').config(); // 🔐 Pour lire les variables du fichier .env
 
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
 const http = require('http');
+const cors = require('cors');
+const session = require('express-session');
+const { connectToMongoDb } = require('./config/db'); // 📦 Connexion MongoDB
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+const indexRouter = require('./routes/indexRouter');
+const usersRouter = require('./routes/usersRouter');
+const osRouter = require('./routes/osRouter');
+const sessionsRouter = require('./routes/sessionsRouter');
+const geminiRouter = require('./routes/geminiRouter');
+const logMiddleware = require('./middlewares/logsMiddlewares.js'); // Middleware de logs
 
-var app = express();
+const app = express(); // Initialisation de l'application
 
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
+// 📡 Connexion à MongoDB
+connectToMongoDb();
 
+// 🛠️ Middlewares
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// 🌐 Middleware CORS
+app.use(cors({
+  origin: "http://localhost:3000",
+  methods: "GET,POST,PUT,DELETE",
+}));
+
+// 🔒 Middleware de session
+app.use(session({
+  secret: "net secret pfe",
+  resave: false,
+  saveUninitialized: true,
+  cookie: {
+    secure: false, // Utilisez `true` si vous êtes en HTTPS
+    maxAge: 24 * 60 * 60 * 1000, // Durée de vie en millisecondes
+  },
+}));
+
+// 📝 Middleware de logs
+app.use(logMiddleware);
+
+// 🔗 Routes
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/os', osRouter);
+app.use('/sessions', sessionsRouter);
+app.use('/gemini', geminiRouter);
 
-// catch 404 and forward to error handler
+// 🧱 Catch 404
 app.use(function (req, res, next) {
-  next(createError(404));
+  res.status(404).json({
+    message: 'Not Found',
+  });
 });
 
-// error handler
+// ❌ Gestion des erreurs
 app.use(function (err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+  res.status(err.status || 500).json({
+    message: err.message,
+    error: req.app.get('env') === 'development' ? err : {}
+  });
 });
 
+// 🚀 Lancer le serveur
+const PORT = process.env.PORT || 5000; // Utilisation de la variable d'environnement PORT
 const server = http.createServer(app);
-server.listen(5000, () => {
-  console.log('app is running on port 5000');
+
+server.listen(PORT, () => {
+  console.log(`app is running on port ${PORT}`);
 });
