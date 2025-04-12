@@ -1,5 +1,9 @@
 const fs = require('fs');
+<<<<<<< HEAD
 const Log = require('../models/Log');
+=======
+const Log = require('../models/logsModels');
+>>>>>>> d93939d ( création du projet backend)
 
 function logMiddleware(req, res, next) {
   const startTime = new Date();

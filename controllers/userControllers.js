@@ -1,138 +1,165 @@
-const Utilisateur = require('../models/userSchema');
+const User = require('../models/userSchema');
 const jwt = require('jsonwebtoken');
 
-const maxTime = 24 * 60 * 60; // 24 heures
-const secretKey = 'net secret pfe';
-
-const createToken = (id) => jwt.sign({ id }, secretKey, { expiresIn: maxTime });
-
-exports.inscriptionUtilisateur = async (req, res) => {
+// Inscription d'un utilisateur
+const inscriptionUtilisateur = async (req, res) => {
   try {
-    const { nom, email, motDePasse, role, specialite, matieresAReviser, matieresEnseignees, tarifCours } = req.body;
+    const { name, email, password, role } = req.body;
 
-    const nouvelUtilisateur = await Utilisateur.create({
-      nom,
-      email,
-      motDePasse,
-      role,
-      specialite: role === 'Etudiant' ? specialite : undefined,
-      matieresAReviser: role === 'Etudiant' ? matieresAReviser : undefined,
-      matieresEnseignees: role === 'Enseignant' ? matieresEnseignees : undefined,
-      tarifCours: role === 'Enseignant' ? tarifCours : undefined,
-    });
+    if (!name || !email || !password || !role) {
+      return res.status(400).json({ message: "Tous les champs sont requis." });
+    }
 
-    res.status(201).json({ nouvelUtilisateur });
+    const user = new User({ name, email, password, role });
+    await user.save();
+
+    res.status(201).json({ message: "Utilisateur inscrit avec succès", user });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-exports.inscriptionUtilisateurAvecImage = async (req, res) => {
+// Connexion d'un utilisateur
+const loginUtilisateur = async (req, res) => {
   try {
-    const { nom, email, motDePasse, role } = req.body;
-    const { filename } = req.file;
+    const { email, password } = req.body;
 
-    const utilisateur = await Utilisateur.create({
-      nom,
-      email,
-      motDePasse,
-      role,
-      image: filename,
-    });
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "Utilisateur introuvable" });
+    }
 
-    res.status(200).json({ utilisateur });
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Mot de passe incorrect" });
+    }
+
+    const token = jwt.sign({ id: user._id }, 'net secret pfe', { expiresIn: '1d' });
+    res.cookie('jwt_token_9antra', token, { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 });
+
+    res.status(200).json({ message: "Connexion réussie", token });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-exports.loginUtilisateur = async (req, res) => {
+// Déconnexion
+const logoutUtilisateur = async (req, res) => {
   try {
-    const { email, motDePasse } = req.body;
-    const utilisateur = await Utilisateur.findOne({ email, motDePasse });
-
-    if (!utilisateur) throw new Error('Email ou mot de passe incorrect.');
-
-    const token = createToken(utilisateur._id);
-
-    res.cookie('jwt_token_plateforme', token, { httpOnly: true, maxAge: maxTime * 1000 });
-    res.status(200).json({ utilisateur });
-  } catch (error) {
-    res.status(401).json({ message: error.message });
-  }
-};
-
-exports.logoutUtilisateur = async (req, res) => {
-  try {
-    res.cookie('jwt_token_plateforme', '', { httpOnly: true, maxAge: 1 });
-    res.status(200).json({ message: 'Déconnecté' });
+    res.clearCookie('jwt_token_9antra');
+    res.status(200).json({ message: "Déconnexion réussie" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-exports.getAllUtilisateurs = async (req, res) => {
+// Récupérer tous les utilisateurs
+const getAllUtilisateurs = async (req, res) => {
   try {
-    const utilisateurs = await Utilisateur.find();
-    res.status(200).json({ utilisateurs });
+    const users = await User.find();
+    res.status(200).json(users);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-exports.getUtilisateurParId = async (req, res) => {
+// Récupérer un utilisateur par ID
+const getUtilisateurParId = async (req, res) => {
   try {
-    const utilisateur = await Utilisateur.findById(req.params.id);
-    if (!utilisateur) throw new Error('Utilisateur introuvable');
-    res.status(200).json({ utilisateur });
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: "Utilisateur introuvable" });
+    }
+    res.status(200).json(user);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-exports.supprimerUtilisateur = async (req, res) => {
-  try {
-    const utilisateur = await Utilisateur.findByIdAndDelete(req.params.id);
-    if (!utilisateur) throw new Error('Utilisateur introuvable');
-    res.status(200).json({ message: 'Utilisateur supprimé' });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-exports.updateUtilisateur = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { nom, email } = req.body;
-
-    await Utilisateur.findByIdAndUpdate(id, { nom, email });
-    const updated = await Utilisateur.findById(id);
-
-    res.status(200).json({ updated });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-exports.searchUtilisateurByNom = async (req, res) => {
+// Recherche par nom
+const searchUtilisateurByNom = async (req, res) => {
   try {
     const { nom } = req.query;
-    if (!nom) throw new Error('Veuillez fournir un nom.');
-
-    const utilisateurs = await Utilisateur.find({ nom: { $regex: nom, $options: 'i' } });
-    const count = utilisateurs.length;
-    res.status(200).json({ utilisateurs, count });
+    const users = await User.find({ name: { $regex: nom, $options: 'i' } });
+    res.status(200).json(users);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-exports.listeUtilisateursParRole = async (req, res) => {
+// Liste des utilisateurs par rôle
+const listeUtilisateursParRole = async (req, res) => {
   try {
     const { role } = req.params;
-    const utilisateurs = await Utilisateur.find({ role });
-    res.status(200).json({ utilisateurs });
+    const users = await User.find({ role });
+    res.status(200).json(users);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
+};
+
+// Mise à jour d'un utilisateur
+const updateUtilisateur = async (req, res) => {
+  try {
+    const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Suppression d'un utilisateur
+const supprimerUtilisateur = async (req, res) => {
+  try {
+    await User.findByIdAndDelete(req.params.id);
+    res.status(200).json({ message: "Utilisateur supprimé" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Inscription avec image (exemple simple)
+const inscriptionUtilisateurAvecImage = async (req, res) => {
+  try {
+    const { name, email, password, role } = req.body;
+    const image = req.file ? req.file.filename : null;
+
+    const user = new User({ name, email, password, role, image });
+    await user.save();
+
+    res.status(201).json({ message: "Utilisateur inscrit avec image", user });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Mise à jour avec image
+const updateUtilisateurAvecImage = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+    if (req.file) {
+      updateData.image = req.file.filename;
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(id, updateData, { new: true });
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// ✅ Export de toutes les fonctions
+module.exports = {
+  inscriptionUtilisateur,
+  loginUtilisateur,
+  logoutUtilisateur,
+  getAllUtilisateurs,
+  getUtilisateurParId,
+  searchUtilisateurByNom,
+  listeUtilisateursParRole,
+  updateUtilisateur,
+  supprimerUtilisateur,
+  inscriptionUtilisateurAvecImage,
+  updateUtilisateurAvecImage
 };

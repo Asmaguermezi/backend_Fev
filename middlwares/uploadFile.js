@@ -1,4 +1,5 @@
 const multer = require('multer');
+<<<<<<< HEAD
 const path = require('path');
 const fs = require('fs');
 
@@ -27,3 +28,17 @@ const storage = multer.diskStorage({
 const uploadFile = multer({ storage: storage });
 
 module.exports = uploadFile;
+=======
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/'); // Dossier où les fichiers seront stockés
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + '-' + file.originalname); // Nom unique pour chaque fichier
+  },
+});
+
+const upload = multer({ storage });
+module.exports = upload;
+>>>>>>> d93939d ( création du projet backend)

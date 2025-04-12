@@ -14,6 +14,7 @@ const usersRouter = require('./routes/usersRouter');
 const osRouter = require('./routes/osRouter');
 const sessionsRouter = require('./routes/sessionsRouter');
 const geminiRouter = require('./routes/geminiRouter');
+<<<<<<< HEAD
 const logMiddleware = require('./middlewares/logsMiddlewares.js'); // Middleware de logs
 
 const app = express(); // Initialisation de l'application
@@ -21,6 +22,19 @@ const app = express(); // Initialisation de l'application
 // 📡 Connexion à MongoDB
 connectToMongoDb();
 
+=======
+const logMiddleware = require('./middlwares/logsMiddlwares.js'); // Middleware de logs
+
+
+
+
+
+const app = express(); // Initialisation de l'application
+
+// 📡 Connexion à MongoDB
+connectToMongoDb();
+
+>>>>>>> d93939d ( création du projet backend)
 // 🛠️ Middlewares
 app.use(logger('dev'));
 app.use(express.json());
