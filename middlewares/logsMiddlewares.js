@@ -1,9 +1,5 @@
 const fs = require('fs');
-<<<<<<< HEAD
-const Log = require('../models/Log');
-=======
-const Log = require('../models/logsModels');
->>>>>>> d93939d ( création du projet backend)
+const Log = require('../models/logsModels'); // Correction de l'importation
 
 function logMiddleware(req, res, next) {
   const startTime = new Date();
@@ -15,26 +11,16 @@ function logMiddleware(req, res, next) {
     const body = Object.keys(req.body).length > 0 ? JSON.stringify(req.body) : 'N/A';
     const referer = req.headers.referer || 'N/A';
 
-    const log = `
-      ${new Date().toISOString()} - 
-      Méthode: ${req.method} 
-      URL: ${req.originalUrl} 
-      IP: ${req.ip} 
-      Referer: ${referer} 
-      Statut: ${res.statusCode} 
-      Utilisateur: ${req.user ? `${req.user._id} | ${req.user.nom}` : 'N/A'} 
-      Headers: ${headers} 
-      Temps d'exécution: ${executionTime} ms 
-      Corps de la requête: ${body} 
-      Résultat: ${res.locals.data || 'N/A'}
-    `;
+    // Formatage du log texte
+    const log = `${new Date().toISOString()} - Méthode: ${req.method}, URL: ${req.originalUrl}, IP: ${req.ip}, Referer: ${referer}, Statut: ${res.statusCode}, Utilisateur: ${req.user ? `${req.user._id} | ${req.user.nom}` : 'N/A'}, Headers: ${headers}, Temps d'exécution: ${executionTime} ms, Corps de la requête: ${body}, Résultat: ${res.locals.data || 'N/A'}\n`;
 
+    // Objet pour MongoDB
     const logEntry = {
       timestamp: new Date(),
       method: req.method,
       url: req.originalUrl,
       ip: req.ip,
-      referer: req.headers.referer || 'N/A',
+      referer,
       status: res.statusCode,
       user: req.user ? { id: req.user._id, nom: req.user.nom } : null,
       headers: req.headers,
@@ -44,7 +30,10 @@ function logMiddleware(req, res, next) {
     };
 
     try {
+      // Écriture dans le fichier log
       fs.appendFileSync('plateforme.log', log);
+
+      // Enregistrement dans MongoDB
       await Log.create(logEntry);
     } catch (err) {
       console.error("Erreur lors de l'enregistrement du log :", err);
