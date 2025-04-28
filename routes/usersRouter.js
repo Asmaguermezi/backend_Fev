@@ -3,7 +3,7 @@ const router = express.Router();
 
 const utilisateurController = require('../controllers/userControllers');
 const upload = require('../middlewares/uploadFile');
-const { requireAuthUser } = require('../middlewares/authMiddlware');
+const { requireAuthUser } = require('../middlewares/authMiddleware');
 
 // 🧪 Route de test pour vérifier la connexion avec le routeur
 router.get('/test', (req, res) => {

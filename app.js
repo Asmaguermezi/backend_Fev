@@ -11,7 +11,7 @@ const cors = require('cors');
 const session = require('express-session');
 const { connectToMongoDb } = require('./config/db'); // 📦 Connexion MongoDB
 
-const logMiddleware = require('./middlewares/logsMiddlwares.js'); // Correction du chemin pour logsMiddlwares
+const logMiddleware = require('./middlewares/logsMiddlewares.js'); // Correction du chemin pour logsMiddlwares
 const Message = require('./models/messageModels.js'); // Vérification du chemin pour messageModels
 
 const indexRouter = require('./routes/indexRouter');
