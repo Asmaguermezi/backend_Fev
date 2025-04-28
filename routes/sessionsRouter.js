@@ -10,4 +10,5 @@ router.delete('/:id', sessionController.deleteSessionById);
 router.post('/ajouter-participant', sessionController.ajouterParticipant);
 router.post('/retirer-participant', sessionController.retirerParticipant);
 
+
 module.exports = router;
