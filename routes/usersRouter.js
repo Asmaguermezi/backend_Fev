@@ -17,6 +17,8 @@ router.post('/inscription', utilisateurController.inscriptionUtilisateur);
 router.post('/login', utilisateurController.loginUtilisateur);
 router.get('/logout', utilisateurController.logoutUtilisateur);
 
+
+
 // 👥 Gestion des utilisateurs
 router.get('/getAllUtilisateurs', requireAuthUser, utilisateurController.getAllUtilisateurs);
 router.get('/getUtilisateurById/:id', utilisateurController.getUtilisateurParId);

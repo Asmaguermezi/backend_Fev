@@ -20,6 +20,9 @@ const osRouter = require('./routes/osRouter');
 const sessionsRouter = require('./routes/sessionsRouter');
 const geminiRouter = require('./routes/geminiRouter');
 const messagesRouter = require('./routes/messagesRouter');
+const notificationsRouter = require('./routes/notificationsRouter');
+const matieresRouter = require('./routes/matieresRouter.js');
+
 
 const app = express(); // Initialisation de l'application
 
@@ -60,6 +63,8 @@ app.use('/api/os', osRouter);
 app.use('/api/sessions', sessionsRouter);
 app.use('/api/gemini', geminiRouter);
 app.use('/api/messages', messagesRouter);
+app.use('/api/notifications', notificationsRouter);
+app.use('/api/matieres', matieresRouter);
 
 // 🧱 Catch 404
 app.use((req, res, next) => {

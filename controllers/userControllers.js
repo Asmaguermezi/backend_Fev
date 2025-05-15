@@ -4,13 +4,13 @@ const jwt = require('jsonwebtoken');
 // Inscription d'un utilisateur
 const inscriptionUtilisateur = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role, specialite } = req.body;
 
-    if (!name || !email || !password || !role) {
+    if (!name || !email || !password || !role || !specialite) {
       return res.status(400).json({ message: "Tous les champs sont requis." });
     }
 
-    const user = new User({ name, email, password, role });
+    const user = new User({ name, email, password, role, specialite });
     await user.save();
 
     res.status(201).json({ message: "Utilisateur inscrit avec succès", user });

@@ -24,7 +24,31 @@ const userSchema = new mongoose.Schema({
     type: String, 
     enum: ['Etudiant', 'Enseignant', 'Admin', 'etudiant', 'enseignant', 'admin'], // ajout des minuscules
     required: true 
-  }
+  },
+  specialite: {
+  type: String,
+  required: function () {
+    return this.role.toLowerCase() === 'etudiant' || this.role.toLowerCase() === 'enseignant';
+  },
+  trim: true
+},
+
+  notifications: [{ 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Notification' 
+  }], // Relation avec les notifications
+  messages: [{ 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Message' 
+  }], // Relation avec les messages
+  sessions: [{ 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'SessionEtude' 
+  }], // Relation avec les sessions d'étude
+  matieres: [{ 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Matiere' 
+  }], // Relation avec les matières
 }, { timestamps: true }); // Ajout des champs createdAt et updatedAt automatiquement
 
 // Middleware pour hacher le mot de passe avant de sauvegarder l'utilisateur

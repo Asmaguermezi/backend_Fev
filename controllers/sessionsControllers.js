@@ -1,5 +1,5 @@
 const SessionEtude = require('../models/SessionEtude');
-const Utilisateur = require('../models/userSchema'); // Correction de l'importation
+const User = require('../models/userSchema'); // Correction de l'importation
 
 module.exports.getAllSessions = async (req, res) => {
   try {

@@ -1,5 +1,5 @@
 const Message = require('../models/messageModels');
-
+const User = require('../models/userSchema');
 // Récupérer tous les messages
 exports.getAllMessages = async (req, res) => {
     try {
