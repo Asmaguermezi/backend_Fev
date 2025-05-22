@@ -6,7 +6,7 @@ const sessionEtudeSchema = new mongoose.Schema({
   participants: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Utilisateur', // Référence au modèle Utilisateur
+      ref: 'User', // ✅ le nom exact utilisé dans userSchema.js
     },
   ],
 });

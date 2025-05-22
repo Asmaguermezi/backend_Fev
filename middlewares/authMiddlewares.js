@@ -19,7 +19,7 @@ const requireAuthUser = async (req, res, next) => {
         return res.status(404).json({ message: "Utilisateur introuvable" });
       }
 
-      req.session.user = user;
+      req.user = { id: decodedToken.id }; // ✅ obligatoire pour getMonProfil
       next();
     });
   } catch (error) {
@@ -28,3 +28,4 @@ const requireAuthUser = async (req, res, next) => {
 };
 
 module.exports = { requireAuthUser };
+

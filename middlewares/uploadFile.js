@@ -4,18 +4,24 @@ const fs = require('fs');
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'public/files'); // Dossier où les fichiers seront stockés
+    cb(null, 'public/files'); // Dossier de stockage
   },
   filename: function (req, file, cb) {
     const uploadPath = 'public/files';
-    const originalName = file.originalname;
-    const fileExtension = path.extname(originalName);
-    let fileName = originalName;
 
-    // Éviter les doublons : fichier (1), fichier (2), etc.
+    // 🧼 Nettoyer le nom du fichier
+    const originalName = file.originalname;
+    const cleanedName = originalName
+      .replace(/\s+/g, '-') // remplacer les espaces par des tirets
+      .replace(/[^a-zA-Z0-9.\-_]/g, ''); // supprimer les caractères spéciaux
+
+    const fileExtension = path.extname(cleanedName);
+    let baseName = path.basename(cleanedName, fileExtension);
+    let fileName = cleanedName;
+
+    // 🔁 Éviter les doublons (fichier_1.jpg, fichier_2.jpg, etc.)
     let fileIndex = 1;
     while (fs.existsSync(path.join(uploadPath, fileName))) {
-      const baseName = path.basename(originalName, fileExtension);
       fileName = `${baseName}_${fileIndex}${fileExtension}`;
       fileIndex++;
     }
@@ -24,6 +30,6 @@ const storage = multer.diskStorage({
   },
 });
 
-const uploadFile = multer({ storage: storage });
+const uploadFile = multer({ storage });
 
 module.exports = uploadFile;

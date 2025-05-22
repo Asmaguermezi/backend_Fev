@@ -3,19 +3,22 @@ const messagesController = require('../controllers/messageControllers');
 
 const router = express.Router();
 
-// Route to get all messages
+// 📥 Récupérer tous les messages (admin ou debug)
 router.get('/', messagesController.getAllMessages);
 
-// Route to get a specific message by ID
+// 🔍 Récupérer un message spécifique par ID
 router.get('/:id', messagesController.getMessageById);
 
-// Route to create a new message
+// 🆕 Créer un nouveau message
 router.post('/', messagesController.createMessage);
 
-// Route to update a message by ID
+// 📝 Mettre à jour un message existant
 router.put('/:id', messagesController.updateMessage);
 
-// Route to delete a message by ID
+// 🗑️ Supprimer un message
 router.delete('/:id', messagesController.deleteMessage);
+
+// 📌 🔁 Récupérer tous les messages d'une session (pour VideoCall.js)
+router.get('/session/:sessionId', messagesController.getMessagesBySessionId);
 
 module.exports = router;

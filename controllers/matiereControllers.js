@@ -13,7 +13,7 @@ exports.ajouterMatiere = async (req, res) => {
 // 📄 Récupérer toutes les matières
 exports.getAllMatieres = async (req, res) => {
   try {
-    const matieres = await Matiere.find();
+    const matieres = await Matiere.find(); // récupère nom, description, icone
     res.status(200).json(matieres);
   } catch (err) {
     res.status(500).json({ error: err.message });

@@ -5,31 +5,33 @@ const utilisateurController = require('../controllers/userControllers');
 const upload = require('../middlewares/uploadFile');
 const { requireAuthUser } = require('../middlewares/authMiddlewares');
 
-// 🧪 Route de test pour vérifier la connexion avec le routeur
+// 🧪 Route de test
 router.get('/test', (req, res) => {
   res.status(200).json({ message: '✅ Route test OK !' });
 });
 
-// 📥 Inscription
-router.post('/inscription', utilisateurController.inscriptionUtilisateur);
-
-// 🔐 Connexion / Déconnexion
+// 🔐 Authentification
 router.post('/login', utilisateurController.loginUtilisateur);
 router.get('/logout', utilisateurController.logoutUtilisateur);
 
+// 👤 Profil connecté (protégé)
+router.get('/getMonProfil', requireAuthUser, utilisateurController.getMonProfil);
 
+// 📥 Inscription (avec ou sans image)
+router.post('/inscription', utilisateurController.inscriptionUtilisateur);
+router.post('/inscriptionAvecImage', upload.single('image'), utilisateurController.inscriptionUtilisateurAvecImage);
 
-// 👥 Gestion des utilisateurs
+// 👥 Utilisateurs (liste, recherche, rôle, etc.)
 router.get('/getAllUtilisateurs', requireAuthUser, utilisateurController.getAllUtilisateurs);
 router.get('/getUtilisateurById/:id', utilisateurController.getUtilisateurParId);
 router.get('/searchUtilisateurByNom', utilisateurController.searchUtilisateurByNom);
 router.get('/getUtilisateursParRole/:role', utilisateurController.listeUtilisateursParRole);
 
+// 🛠️ Mise à jour
 router.put('/updateUtilisateurById/:id', utilisateurController.updateUtilisateur);
-router.delete('/deleteUtilisateurById/:id', utilisateurController.supprimerUtilisateur);
+router.put('/updateUtilisateurAvecImage/:id', upload.single('image'), utilisateurController.updateUtilisateurAvecImage);
 
-// 📸 Inscription / Mise à jour avec image
-router.post('/inscriptionAvecImage', upload.single('image_utilisateur'), utilisateurController.inscriptionUtilisateurAvecImage);
-router.put('/updateUtilisateurAvecImage/:id', upload.single('image_utilisateur'), utilisateurController.updateUtilisateurAvecImage);
+// ❌ Suppression
+router.delete('/deleteUtilisateurById/:id', utilisateurController.supprimerUtilisateur);
 
 module.exports = router;
