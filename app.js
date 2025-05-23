@@ -21,7 +21,7 @@ const geminiRouter = require('./routes/geminiRouter');
 const messagesRouter = require('./routes/messagesRouter');
 const notificationsRouter = require('./routes/notificationsRouter');
 const matieresRouter = require('./routes/matieresRouter.js');
-
+const statsRouter = require('./routes/statsRouter.js');
 const app = express();
 
 // Connexion à MongoDB
@@ -56,7 +56,7 @@ app.use('/api/gemini', geminiRouter);
 app.use('/api/messages', messagesRouter);
 app.use('/api/notifications', notificationsRouter);
 app.use('/api/matieres', matieresRouter);
-
+app.use('/api/stats', statsRouter);
 // Gestion 404
 app.use((req, res, next) => {
   res.status(404).json({ message: 'Not Found' });
